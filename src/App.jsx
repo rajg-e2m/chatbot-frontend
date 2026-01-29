@@ -9,9 +9,13 @@ function App() {
     <BrowserRouter>
       <div className="relative h-full flex flex-col">
         <Navbar />
-        <main className="flex-1 flex justify-center items-center overflow-hidden">
+        <main className="flex-1 overflow-y-auto">
           <Routes>
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={
+              <div className="h-full flex items-center justify-center p-8">
+                <LandingPage />
+              </div>
+            } />
             <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </main>
