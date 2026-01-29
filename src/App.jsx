@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import LandingPage from "./pages/LandingPage";
 import AdminPage from "./pages/AdminPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import Navbar from "./components/Navbar";
 import ChatBubble from "./components/ChatBubble";
 
@@ -17,6 +18,7 @@ function App() {
               </div>
             } />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
         <ChatBubble />

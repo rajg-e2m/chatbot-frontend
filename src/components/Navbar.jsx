@@ -6,7 +6,6 @@ import {
     NavigationMenuList,
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Button } from "@/components/ui/button";
 import { MessageSquareCode } from "lucide-react";
 
 export default function Navbar() {
@@ -40,8 +39,6 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex items-center gap-2 md:gap-4 shrink-0">
-                    <Button variant="ghost" size="sm" className="hidden sm:inline-flex">Log in</Button>
-                    <Button size="sm">Get Started</Button>
                 </div>
             </div>
         </header>
