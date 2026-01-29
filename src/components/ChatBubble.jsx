@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { initChat, registerLead, sendMessage } from "../api/chat";
 import { Bot, X, Send, User, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -128,7 +129,7 @@ export default function ChatBubble() {
     return (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
             {isOpen && (
-                <Card className="mb-4 w-[calc(100vw-3rem)] sm:w-96 shadow-2xl animate-in slide-in-from-bottom-5 duration-300 border-2 overflow-hidden flex flex-col h-[500px]">
+                <Card className="mb-4 w-[calc(100vw-3rem)] sm:w-96 shadow-2xl border-2 overflow-hidden flex flex-col h-[500px] p-0">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 bg-black text-white shrink-0">
                         <div className="flex items-center gap-3">
                             <div className="relative flex-shrink-0">
@@ -160,44 +161,67 @@ export default function ChatBubble() {
 
                     <CardContent
                         ref={scrollRef}
-                        className="flex-1 p-4 space-y-4 overflow-y-auto bg-white relative"
+                        className="flex-1 p-4 space-y-4 overflow-y-auto bg-white relative scrollbar-hide"
                         style={{
-                            backgroundImage: `url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 8H9M8 7V9' stroke='%23f0f0f0' stroke-width='1'/%3E%3C/svg%3E")`,
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 8H9M8 7V9' stroke='%23d1d5db' stroke-width='1.5'/%3E%3C/svg%3E")`,
                             backgroundSize: '16px 16px',
-                            backgroundPosition: '8px 8px'
+                            backgroundPosition: '8px 8px',
+                            scrollbarWidth: 'none',
+                            msOverflowStyle: 'none'
                         }}
                     >
-                        {chatHistory.map((msg, idx) => (
-                            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={cn(
-                                    "max-w-[80%] p-3 px-4 rounded-2xl text-[13px] shadow-sm",
-                                    msg.role === 'user'
-                                        ? "bg-black text-white rounded-tr-none"
-                                        : "bg-[#f3f3f3] text-black rounded-tl-none"
-                                )}>
-                                    {msg.content}
-                                </div>
-                            </div>
-                        ))}
+                        <style dangerouslySetInnerHTML={{ __html: `
+                            .scrollbar-hide::-webkit-scrollbar {
+                                display: none;
+                            }
+                        `}} />
+                        <AnimatePresence mode="popLayout">
+                            {chatHistory.map((msg, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    transition={{ duration: 0.3, ease: "easeOut" }}
+                                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                >
+                                    <div className={cn(
+                                        "max-w-[80%] p-3 px-4 rounded-2xl text-[13px] shadow-sm",
+                                        msg.role === 'user'
+                                            ? "bg-black text-white rounded-tr-none"
+                                            : "bg-[#f3f3f3] text-black rounded-tl-none"
+                                    )}>
+                                        {msg.content}
+                                    </div>
+                                </motion.div>
+                            ))}
 
-                        {detailStep === 'name' && (
-                            <div className="flex justify-end">
-                                <DetailInputBubble
-                                    placeholder="Your Name"
-                                    onSubmit={(val) => handleDetailSubmit('name', val)}
-                                />
-                            </div>
-                        )}
+                            {detailStep === 'name' && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    className="flex justify-end"
+                                >
+                                    <DetailInputBubble
+                                        placeholder="Your Name"
+                                        onSubmit={(val) => handleDetailSubmit('name', val)}
+                                    />
+                                </motion.div>
+                            )}
 
-                        {detailStep === 'email' && (
-                            <div className="flex justify-end">
-                                <DetailInputBubble
-                                    placeholder="Your Email"
-                                    type="email"
-                                    onSubmit={(val) => handleDetailSubmit('email', val)}
-                                />
-                            </div>
-                        )}
+                            {detailStep === 'email' && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    className="flex justify-end"
+                                >
+                                    <DetailInputBubble
+                                        placeholder="Your Email"
+                                        type="email"
+                                        onSubmit={(val) => handleDetailSubmit('email', val)}
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         {isLoading && (
                             <div className="flex justify-start">
@@ -220,7 +244,7 @@ export default function ChatBubble() {
                         >
                             <input
                                 placeholder="Enter message"
-                                className="flex-1 bg-transparent border-none focus:outline-none text-sm py-3 disabled:opacity-50"
+                                className="flex-1 bg-transparent border-none focus:outline-none text-sm py-3 disabled:opacity-50 text-black placeholder:text-gray-600 font-medium"
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 disabled={isLoading || isAskingForDetails}
@@ -280,7 +304,7 @@ function DetailInputBubble({ placeholder, onSubmit, type = "text" }) {
                     setVal(e.target.value);
                     setError(false);
                 }}
-                className="bg-transparent text-white text-[13px] px-3 py-2 focus:outline-none w-full placeholder:text-gray-500"
+                className="bg-transparent text-white text-[13px] px-3 py-2 focus:outline-none w-full placeholder:text-gray-400 font-medium"
             />
             <button
                 type="submit"
