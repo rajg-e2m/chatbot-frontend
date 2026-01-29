@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { initChat, registerLead, sendMessage } from "../api/chat";
 import { Bot, X, Send, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,11 +19,63 @@ export default function ChatBubble() {
     const [message, setMessage] = useState("");
     const [leadCaptured, setLeadCaptured] = useState(false);
     const [formData, setFormData] = useState({ name: "", email: "" });
+    const [threadId, setThreadId] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [chatHistory, setChatHistory] = useState([]);
 
-    const handleLeadSubmit = (e) => {
+    useEffect(() => {
+        const initialize = async () => {
+            let currentThreadId = localStorage.getItem("chat_thread_id");
+            if (!currentThreadId) {
+                currentThreadId = crypto.randomUUID();
+                localStorage.setItem("chat_thread_id", currentThreadId);
+            }
+            setThreadId(currentThreadId);
+            try {
+                await initChat(currentThreadId);
+            } catch (error) {
+                console.error("Failed to init chat:", error);
+            }
+        };
+        initialize();
+    }, []);
+
+    const handleLeadSubmit = async (e) => {
         e.preventDefault();
         if (formData.name && formData.email) {
-            setLeadCaptured(true);
+            setIsLoading(true);
+            try {
+                await registerLead({
+                    ...formData,
+                    phone: "N/A",
+                    thread_id: threadId
+                });
+                setLeadCaptured(true);
+            } catch (error) {
+                console.error("Error registering lead:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    };
+
+    const handleSendMessage = async (text) => {
+        if (!text.trim()) return;
+
+        const userMessage = { role: 'user', content: text };
+        setChatHistory(prev => [...prev, userMessage]);
+        setMessage("");
+        setIsLoading(true);
+
+        try {
+            const response = await sendMessage(text, threadId);
+            const botMessage = { role: 'assistant', content: response.answer };
+            setChatHistory(prev => [...prev, botMessage]);
+        } catch (error) {
+            console.error("Failed to send message:", error);
+            setChatHistory(prev => [...prev, { role: 'assistant', content: "Sorry, I encountered an error. Please try again." }]);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -74,7 +127,7 @@ export default function ChatBubble() {
                                             placeholder="Your Name"
                                             required
                                             value={formData.name}
-                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -85,7 +138,7 @@ export default function ChatBubble() {
                                             placeholder="your@email.com"
                                             required
                                             value={formData.email}
-                                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         />
                                     </div>
                                 </form>
@@ -119,12 +172,31 @@ export default function ChatBubble() {
                                             <button
                                                 key={faq}
                                                 className="text-left text-xs bg-background border hover:border-primary hover:text-primary transition-colors px-3 py-2 rounded-xl shadow-sm"
-                                                onClick={() => setMessage(faq)}
+                                                onClick={() => handleSendMessage(faq)}
                                             >
                                                 {faq}
                                             </button>
                                         ))}
                                     </div>
+                                </div>
+                                <div className="space-y-4 pt-4 border-t">
+                                    {chatHistory.map((msg, idx) => (
+                                        <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                            <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${msg.role === 'user'
+                                                    ? 'bg-primary text-primary-foreground rounded-tr-none'
+                                                    : 'bg-muted rounded-tl-none'
+                                                }`}>
+                                                {msg.content}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {isLoading && (
+                                        <div className="flex justify-start">
+                                            <div className="bg-muted p-3 rounded-2xl rounded-tl-none text-sm animate-pulse">
+                                                Thinking...
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </CardContent>
                             <CardFooter className="p-3 bg-background border-t">
@@ -132,7 +204,7 @@ export default function ChatBubble() {
                                     className="flex w-full items-center gap-2"
                                     onSubmit={(e) => {
                                         e.preventDefault();
-                                        setMessage("");
+                                        handleSendMessage(message);
                                     }}
                                 >
                                     <Input
@@ -140,6 +212,7 @@ export default function ChatBubble() {
                                         className="flex-1 rounded-full px-4"
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
+                                        disabled={isLoading}
                                     />
                                     <Button
                                         type="submit"
