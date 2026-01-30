@@ -182,13 +182,18 @@ export default function ChatBubble() {
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     transition={{ duration: 0.3, ease: "easeOut" }}
-                                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                    className={`flex items-end gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
                                 >
+                                    <Avatar className="h-8 w-8 shrink-0 border shadow-sm">
+                                        <AvatarFallback className={cn("text-[10px]", msg.role === 'user' ? "bg-black text-white" : "bg-white text-black")}>
+                                            {msg.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                                        </AvatarFallback>
+                                    </Avatar>
                                     <div className={cn(
-                                        "max-w-[80%] p-3 px-4 rounded-2xl text-[13px] shadow-sm",
+                                        "max-w-[75%] p-3 px-4 rounded-2xl text-[13px] shadow-sm",
                                         msg.role === 'user'
-                                            ? "bg-black text-white rounded-tr-none"
-                                            : "bg-[#f3f3f3] text-black rounded-tl-none"
+                                            ? "bg-black text-white rounded-br-none"
+                                            : "bg-[#f3f3f3] text-black rounded-bl-none"
                                     )}>
                                         {msg.content}
                                     </div>
@@ -199,8 +204,13 @@ export default function ChatBubble() {
                                 <motion.div
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    className="flex justify-end"
+                                    className="flex items-end gap-2 flex-row-reverse"
                                 >
+                                    <Avatar className="h-8 w-8 shrink-0 border shadow-sm">
+                                        <AvatarFallback className="text-[10px] bg-black text-white">
+                                            <User className="h-4 w-4" />
+                                        </AvatarFallback>
+                                    </Avatar>
                                     <DetailInputBubble
                                         placeholder="Your Name"
                                         onSubmit={(val) => handleDetailSubmit('name', val)}
@@ -212,8 +222,13 @@ export default function ChatBubble() {
                                 <motion.div
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    className="flex justify-end"
+                                    className="flex items-end gap-2 flex-row-reverse"
                                 >
+                                    <Avatar className="h-8 w-8 shrink-0 border shadow-sm">
+                                        <AvatarFallback className="text-[10px] bg-black text-white">
+                                            <User className="h-4 w-4" />
+                                        </AvatarFallback>
+                                    </Avatar>
                                     <DetailInputBubble
                                         placeholder="Your Email"
                                         type="email"
@@ -234,7 +249,7 @@ export default function ChatBubble() {
                         )}
                     </CardContent>
 
-                    <CardFooter className="p-3 bg-white border-t shrink-0">
+                    <CardFooter className="p-3 bg-white shrink-0">
                         <form
                             className="flex w-full items-center gap-2 bg-[#f3f3f3] rounded-full px-4"
                             onSubmit={(e) => {
@@ -291,7 +306,7 @@ function DetailInputBubble({ placeholder, onSubmit, type = "text" }) {
         <form
             onSubmit={handleSubmit}
             className={cn(
-                "max-w-[80%] p-1 rounded-2xl rounded-tr-none bg-black flex items-center gap-1 border-2 transition-colors",
+                "max-w-[80%] p-1 rounded-2xl rounded-br-none bg-black flex items-center gap-1 border-2 transition-colors",
                 error ? "border-red-500" : "border-black"
             )}
         >
